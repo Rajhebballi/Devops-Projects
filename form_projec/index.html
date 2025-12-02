@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Serverless Form</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f0f0; }
+        .card { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 300px; }
+        input, textarea { width: 100%; margin-bottom: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #ff9900; border: none; color: white; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #e68a00; }
+        #status { margin-top: 10px; font-size: 0.9em; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Contact Me</h2>
+    <input type="text" id="name" placeholder="Your Name">
+    <input type="email" id="email" placeholder="Your Email"> <!-- New Field -->
+    <input type="text" id="subject" placeholder="Subject">     <!-- New Field -->
+    <textarea id="message" placeholder="Your Message"></textarea>
+    <button onclick="sendData()">Send to Cloud</button>
+    <p id="status"></p>
+</div>
+
+<script>
+    async function sendData() {
+        const status = document.getElementById('status');
+        
+        // 1. Get the new values from the HTML boxes
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;     // New
+        const subject = document.getElementById('subject').value; // New
+        const message = document.getElementById('message').value;
+        
+        // ---------------------------------------------------------
+        // YOUR URL IS ALREADY HERE
+        // ---------------------------------------------------------
+        const apiUrl = "https://fg2lzutw67.execute-api.eu-north-1.amazonaws.com/submit"; 
+
+        status.innerText = "Sending...";
+        status.style.color = "blue";
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                // 2. Pack the new values into the box we send to AWS
+                body: JSON.stringify({ 
+                    name: name, 
+                    email: email,       // New
+                    subject: subject,   // New
+                    message: message 
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                status.innerText = "✅ " + data;
+                status.style.color = "green";
+            } else {
+                status.innerText = "❌ Error: " + response.status;
+                status.style.color = "red";
+            }
+        } catch (error) {
+            console.error(error);
+            status.innerText = "❌ Network Error (Check Console)";
+            status.style.color = "red";
+        }
+    }
+</script>
+
+</body>
+</html>
