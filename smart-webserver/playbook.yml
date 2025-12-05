@@ -1,0 +1,65 @@
+---
+- name: Smart Webserver Setup Using Facts & Conditionals
+  hosts: all
+  become: yes
+
+  vars_files:
+    - vars.yml
+
+  tasks:
+
+    # 1️⃣ SHOW BASIC FACTS
+    - name: Show server facts
+      debug:
+        msg:
+          - "OS Family: {{ ansible_os_family }}"
+          - "Distribution: {{ ansible_distribution }}"
+          - "Total RAM: {{ ansible_memtotal_mb }} MB"
+          - "CPU Count: {{ ansible_processor_count }}"
+
+    # 2️⃣ INSTALL WEB SERVER BASED ON OS
+
+    - name: Install Apache on Ubuntu/Debian
+      apt:
+        name: apache2
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Install httpd on RedHat/CentOS
+      yum:
+        name: httpd
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    # 3️⃣ ENABLE SERVICE
+
+    - name: Enable & Start Apache2 (Debian)
+      service:
+        name: apache2
+        state: started
+        enabled: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Enable & Start httpd (RedHat)
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+      when: ansible_os_family == "RedHat"
+
+    # 4️⃣ CONDITIONAL BASED ON MEMORY
+
+    - name: Create high memory folder if RAM > 2GB
+      file:
+        path: /opt/high_memory
+        state: directory
+      when: ansible_memtotal_mb > memory_threshold_mb
+
+    # 5️⃣ CONDITIONAL BASED ON CPU
+
+    - name: Enable performance mode if CPU > threshold
+      debug:
+        msg: "Performance mode enabled!"
+      when: ansible_processor_count > performance_threshold_cpu
+
