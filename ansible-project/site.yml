@@ -1,0 +1,10 @@
+---
+- name: Complete Server Setup using Roles
+  hosts: web
+  become: yes
+
+  roles:
+    - roles/nginx
+    - roles/users
+    - roles/firewall
+
