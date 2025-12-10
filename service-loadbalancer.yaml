@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: welcome-loadbalancer
+spec:
+  type: LoadBalancer
+  selector:
+    app: welcome
+  ports:
+  - port: 80
+    targetPort: 8080
